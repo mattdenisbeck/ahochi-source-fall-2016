@@ -1,6 +1,6 @@
-from scrapy.spider import Spider
+from scrapy.spiders import Spider
 from scrapy.selector import Selector
-from pygoogle import pygoogle
+from google import search
 from Ahochi.items import LocationCrawlerItem
 from Ahochi.geographic_info import GeographicInfo
 import re
@@ -15,13 +15,15 @@ class locationSpider(Spider):
     zip_codes = GeographicInfo().getZips()
     keywordList = GeographicInfo().makeKeywords()
 
-    #uses google to search the string inputed
-    gsearch = pygoogle('boone county social services')
-    #Determines how many pages of results the spider will crawl
-    gsearch.pages = 1
+    #uses google to search the string 
+    gsearch = search('boone county ky social services', stop=20)
+    
+    #builds an list of URLs from google search
+    url_array = []
+    for url in gsearch:
+        url_array.append(url)
 
     #creats an array filled with the google result pages for the spider to start searching
-    url_array = gsearch.get_urls()
     start_urls = url_array
 
     def parse(self, response):
@@ -87,7 +89,7 @@ class locationSpider(Spider):
                     print (item["state"])
                     temp_address_str = state_proper_string.group()
                     #print temp_address_str
-                #if it doesn't doesn't find either it stores the state field with "none"
+                #if it doesn't find either it stores the state field with "none"
                 else:
                     item["state"] = None
                     temp_address_str = None
